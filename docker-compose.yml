@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  # The React Frontend
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8080/api # Points to the API Gateway/Proxy
+    networks:
+      - headhunt_net
+
+  # The Authentication Service
+  auth-service:
+    build:
+      context: ./services/auth-service
+    environment:
+      - PORT=4001
+      - DB_HOST=postgres # Connects to the postgres service below
+      - DB_USER=myuser
+      - DB_PASSWORD=mypassword
+      - DB_DATABASE=auth_db
+      - JWT_SECRET=your_super_secret_key
+    networks:
+      - headhunt_net
+    depends_on:
+      - postgres
+
+  # Add other services here (job-service, candidate-service, etc.)
+
+  # An API Gateway/Proxy to route requests
+  # This simulates the Application Load Balancer for local development
+  api-gateway:
+    image: nginx:alpine
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "8080:80"
+    networks:
+      - headhunt_net
+    depends_on:
+      - auth-service
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=myuser
+      - POSTGRES_PASSWORD=mypassword
+      - POSTGRES_DB=auth_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - headhunt_net
+
+networks:
+  headhunt_net:
+    driver: bridge
+
+volumes:
+  postgres_data:

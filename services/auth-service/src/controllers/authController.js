@@ -1,0 +1,100 @@
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+const userModel = require('../models/userModel');
+
+const generateTokens = (user) => {
+  const accessToken = jwt.sign(
+    { id: user.id, email: user.email },
+    process.env.ACCESS_TOKEN_SECRET,
+    { expiresIn: '15m' }
+  );
+  const refreshToken = jwt.sign(
+    { id: user.id },
+    process.env.REFRESH_TOKEN_SECRET,
+    { expiresIn: '7d' }
+  );
+  return { accessToken, refreshToken };
+};
+
+const authController = {
+  async register(req, res) {
+    try {
+      const { email, password, firstName, lastName } = req.body;
+      if (!email || !password || !firstName) {
+        return res.status(400).json({ message: 'Email, password, and first name are required.' });
+      }
+
+      const existingUser = await userModel.findUserByEmail(email);
+      if (existingUser) {
+        return res.status(409).json({ message: 'User with this email already exists.' });
+      }
+
+      const newUser = await userModel.createUser(email, password, firstName, lastName);
+      res.status(201).json({ message: 'User registered successfully', user: newUser });
+    } catch (error) {
+      console.error('Registration error:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  },
+
+  async login(req, res) {
+    try {
+      const { email, password } = req.body;
+      const user = await userModel.findUserByEmail(email);
+
+      if (!user || !user.password_hash) {
+        return res.status(401).json({ message: 'Invalid credentials or user signed up with a social provider.' });
+      }
+
+      const isMatch = await bcrypt.compare(password, user.password_hash);
+      if (!isMatch) {
+        return res.status(401).json({ message: 'Invalid credentials.' });
+      }
+
+      const { accessToken, refreshToken } = generateTokens(user);
+
+      res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+      });
+
+      res.json({
+        accessToken,
+        user: { id: user.id, email: user.email, firstName: user.first_name }
+      });
+    } catch (error) {
+      console.error('Login error:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  },
+
+  socialLoginCallback(req, res) {
+    const user = req.user;
+    const { accessToken, refreshToken } = generateTokens(user);
+
+    res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000
+    });
+    
+    // Redirect to a frontend page that will handle the token
+    res.redirect(`${process.env.FRONTEND_URL}/auth/callback?accessToken=${accessToken}`);
+  },
+
+  async getProfile(req, res) {
+    // The user object is attached to the request by the authMiddleware
+    const user = await userModel.findUserById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.json({ user });
+  },
+
+  // Add other controller methods like refreshToken and logout here...
+};
+
+module.exports = authController;
