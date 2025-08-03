@@ -1,37 +1,60 @@
+# This docker-compose.yml file demonstrates how to run a separate
+# PostgreSQL database container for each microservice.
+
 version: '3.8'
 
 services:
-  # The React Frontend
+  # =================================================================
+  # Frontend Service (No changes needed)
+  # =================================================================
   frontend:
     build:
       context: ./frontend
     ports:
       - "3000:3000"
     environment:
-      - REACT_APP_API_URL=http://localhost:8080/api # Points to the API Gateway/Proxy
+      - REACT_APP_API_URL=http://localhost:8080/api
     networks:
       - headhunt_net
 
-  # The Authentication Service
+  # =================================================================
+  # Authentication Service
+  # =================================================================
   auth-service:
     build:
       context: ./services/auth-service
     environment:
       - PORT=4001
-      - DB_HOST=postgres # Connects to the postgres service below
-      - DB_USER=myuser
-      - DB_PASSWORD=mypassword
+      - DB_HOST=postgres-auth # <-- Connects to the auth database
+      - DB_USER=auth_user
+      - DB_PASSWORD=auth_password
       - DB_DATABASE=auth_db
-      - JWT_SECRET=your_super_secret_key
+      # ... other auth-service env vars
     networks:
       - headhunt_net
     depends_on:
-      - postgres
+      - postgres-auth
 
-  # Add other services here (job-service, candidate-service, etc.)
+  # =================================================================
+  # Job Service
+  # =================================================================
+  job-service:
+    build:
+      context: ./services/job-service
+    environment:
+      - PORT=4002
+      - DB_HOST=postgres-jobs # <-- Connects to the new jobs database
+      - DB_USER=jobs_user
+      - DB_PASSWORD=jobs_password
+      - DB_DATABASE=jobs_db
+    networks:
+      - headhunt_net
+    depends_on:
+      - postgres-jobs
 
-  # An API Gateway/Proxy to route requests
-  # This simulates the Application Load Balancer for local development
+  # =================================================================
+  # API Gateway (No changes needed, but depends on new services)
+  # =================================================================
   api-gateway:
     image: nginx:alpine
     volumes:
@@ -42,24 +65,48 @@ services:
       - headhunt_net
     depends_on:
       - auth-service
+      - job-service
 
-  # PostgreSQL Database
-  postgres:
+  # =================================================================
+  # Database for Auth Service
+  # =================================================================
+  postgres-auth:
     image: postgres:15-alpine
+    container_name: postgres-auth-db
     environment:
-      - POSTGRES_USER=myuser
-      - POSTGRES_PASSWORD=mypassword
+      - POSTGRES_USER=auth_user
+      - POSTGRES_PASSWORD=auth_password
       - POSTGRES_DB=auth_db
     ports:
-      - "5432:5432"
+      - "5432:5432" # Host port 5432 maps to this container's 5432
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_auth_data:/var/lib/postgresql/data
     networks:
       - headhunt_net
 
+  # =================================================================
+  # NEW: Database for Job Service
+  # =================================================================
+  postgres-jobs:
+    image: postgres:15-alpine
+    container_name: postgres-jobs-db
+    environment:
+      - POSTGRES_USER=jobs_user
+      - POSTGRES_PASSWORD=jobs_password
+      - POSTGRES_DB=jobs_db
+    ports:
+      - "5433:5432" # Host port 5433 maps to this container's 5432 to avoid conflict
+    volumes:
+      - postgres_jobs_data:/var/lib/postgresql/data
+    networks:
+      - headhunt_net
+
+# Define the network for all services to communicate
 networks:
   headhunt_net:
     driver: bridge
 
+# Define persistent data volumes for each database
 volumes:
-  postgres_data:
+  postgres_auth_data:
+  postgres_jobs_data:
