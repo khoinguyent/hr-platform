@@ -1,19 +1,11 @@
 FROM node:18-alpine
-
-# Set the working directory in the container
 WORKDIR /usr/src/app
-
-# Copy package.json and package-lock.json
 COPY package*.json ./
-
-# Install app dependencies
 RUN npm install
-
-# Copy the rest of the application code
 COPY . .
 
-# Your app binds to port 4001
-EXPOSE 4001
+# Make the entrypoint script executable
+RUN chmod +x /usr/src/app/entrypoint.sh
 
-# Define the command to run your app
-CMD [ "node", "src/server.js" ]
+# Set the entrypoint script to be executed when the container starts
+ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
