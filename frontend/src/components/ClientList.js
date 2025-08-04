@@ -1,6 +1,19 @@
 import React from 'react';
 
 const ClientList = ({ clients }) => {
+  // Transform real API data to match component expectations
+  const transformClientData = (client) => ({
+    ...client,
+    // Use interaction_count as active_jobs for demo purposes
+    active_jobs: parseInt(client.interaction_count) || 0,
+    // Use contact_count as placements for demo purposes  
+    placements: parseInt(client.contact_count) || 0,
+    // Use updated_at as last_activity
+    last_activity: client.updated_at
+  });
+
+  const displayClients = clients.map(transformClientData);
+
   const getStatusColor = (status) => {
     switch (status) {
       case 'active':
@@ -64,7 +77,7 @@ const ClientList = ({ clients }) => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {clients.map((client) => (
+            {displayClients.map((client) => (
               <tr key={client.id} className="hover:bg-gray-50 cursor-pointer">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">

@@ -5,11 +5,7 @@ const clientRoutes = require('./routes/clientRoutes');
 const app = express();
 const PORT = process.env.PORT || 4003;
 
-// Middleware
-app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
-  credentials: true
-}));
+// Middleware - CORS handled by nginx
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

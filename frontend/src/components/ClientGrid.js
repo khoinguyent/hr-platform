@@ -49,51 +49,18 @@ const ClientGrid = ({ clients, onClientClick }) => {
     });
   };
 
-  // Mock data for demonstration - replace with real data when available
-  const mockClients = [
-    {
-      id: '1',
-      company_name: 'TechCorp Inc.',
-      industry: 'Technology',
-      status: 'active',
-      service_tier: 'premium',
-      city: 'San Francisco',
-      state: 'CA',
-      employee_count: 750,
-      active_jobs: 3,
-      placements: 12,
-      last_activity: '2024-01-18'
-    },
-    {
-      id: '2',
-      company_name: 'InnovateLabs',
-      industry: 'Fintech',
-      status: 'active',
-      service_tier: 'standard',
-      city: 'New York',
-      state: 'NY',
-      employee_count: 250,
-      active_jobs: 1,
-      placements: 8,
-      last_activity: '2024-01-15'
-    },
-    {
-      id: '3',
-      company_name: 'DesignStudio',
-      industry: 'Design',
-      status: 'prospect',
-      service_tier: 'basic',
-      city: 'Austin',
-      state: 'TX',
-      employee_count: 75,
-      active_jobs: 0,
-      placements: 0,
-      last_activity: '2024-01-10'
-    }
-  ];
+  // Transform real API data to match component expectations
+  const transformClientData = (client) => ({
+    ...client,
+    // Use interaction_count as active_jobs for demo purposes
+    active_jobs: parseInt(client.interaction_count) || 0,
+    // Use contact_count as placements for demo purposes  
+    placements: parseInt(client.contact_count) || 0,
+    // Use updated_at as last_activity
+    last_activity: client.updated_at
+  });
 
-  // Use mock data if no real clients are available
-  const displayClients = clients.length > 0 ? clients : mockClients;
+  const displayClients = clients.map(transformClientData);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
