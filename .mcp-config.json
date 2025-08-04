@@ -1,0 +1,40 @@
+{
+  "mcpServers": {
+    "git-helper": {
+      "command": "node",
+      "args": ["./scripts/mcp-git-helper.js"],
+      "env": {
+        "NODE_ENV": "development"
+      }
+    },
+    "commit-generator": {
+      "command": "node",
+      "args": ["./scripts/mcp-commit-generator.js"],
+      "env": {
+        "NODE_ENV": "development"
+      }
+    }
+  },
+  "workflows": {
+    "commit-and-push": {
+      "description": "Generate commit message, commit changes, and push to remote",
+      "steps": [
+        "analyze-changes",
+        "generate-commit-message",
+        "commit-changes",
+        "push-to-remote"
+      ]
+    },
+    "feature-complete": {
+      "description": "Complete feature workflow with testing and documentation",
+      "steps": [
+        "run-tests",
+        "generate-docs",
+        "analyze-changes",
+        "generate-commit-message",
+        "commit-changes",
+        "push-to-remote"
+      ]
+    }
+  }
+} 
