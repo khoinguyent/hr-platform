@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
+import ClientManagementPage from './pages/ClientManagementPage';
 import AuthCallbackPage from './pages/AuthCallbackPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -17,6 +18,14 @@ function App() {
       {/* Protected Routes */}
       <Route 
         path="/" 
+        element={
+          <ProtectedRoute>
+            <ClientManagementPage />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/dashboard" 
         element={
           <ProtectedRoute>
             <DashboardPage />
