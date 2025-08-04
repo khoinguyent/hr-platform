@@ -55,6 +55,23 @@ services:
     depends_on:
       - postgres-jobs
 
+  client-service:
+    build:
+      context: ./services/client-service
+    environment:
+      - PORT=4003
+      - DB_HOST=postgres-clients
+      - DB_USER=clients_user
+      - DB_PASSWORD=clients_password
+      - DB_DATABASE=clients_db
+      - JWT_SECRET=your_jwt_secret_here
+      - CORS_ORIGIN=http://localhost:3000
+      - NODE_ENV=development
+    networks:
+      - headhunt_net
+    depends_on:
+      - postgres-clients
+
   # =================================================================
   # API Gateway (No changes needed, but depends on new services)
   # =================================================================
@@ -69,6 +86,7 @@ services:
     depends_on:
       - auth-service
       - job-service
+      - client-service
 
   # =================================================================
   # Database for Auth Service
@@ -104,6 +122,20 @@ services:
     networks:
       - headhunt_net
 
+  postgres-clients:
+    image: postgres:15-alpine
+    container_name: postgres-clients-db
+    environment:
+      - POSTGRES_USER=clients_user
+      - POSTGRES_PASSWORD=clients_password
+      - POSTGRES_DB=clients_db
+    ports:
+      - "5434:5432" # Host port 5434 maps to this container's 5432 to avoid conflict
+    volumes:
+      - postgres_clients_data:/var/lib/postgresql/data
+    networks:
+      - headhunt_net
+
 # Define the network for all services to communicate
 networks:
   headhunt_net:
@@ -113,3 +145,4 @@ networks:
 volumes:
   postgres_auth_data:
   postgres_jobs_data:
+  postgres_clients_data:

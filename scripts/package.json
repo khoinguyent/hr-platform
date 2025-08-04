@@ -8,6 +8,7 @@
     "generate-data": "node generate-dummy-data.js",
     "generate-users": "node generate-users-only.js",
     "generate-jobs": "node generate-jobs-only.js",
+    "generate-clients": "node generate-clients-only.js",
     "clear-data": "node clear-dummy-data.js"
   },
   "dependencies": {
