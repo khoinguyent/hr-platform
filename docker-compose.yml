@@ -43,10 +43,13 @@ services:
       context: ./services/job-service
     environment:
       - PORT=4002
-      - DB_HOST=postgres-jobs # <-- Connects to the new jobs database
+      - DB_HOST=postgres-jobs
       - DB_USER=jobs_user
       - DB_PASSWORD=jobs_password
       - DB_DATABASE=jobs_db
+      - JWT_SECRET=your_jwt_secret_here
+      - CORS_ORIGIN=http://localhost:3000
+      - NODE_ENV=development
     networks:
       - headhunt_net
     depends_on:

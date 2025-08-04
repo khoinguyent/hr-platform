@@ -7,6 +7,8 @@ const { protect } = require('../middleware/authMiddleware');
 // Local Auth
 router.post('/register', authController.register);
 router.post('/login', authController.login);
+router.post('/refresh-token', authController.refreshToken);
+router.post('/logout', authController.logout);
 
 // Protected route example
 router.get('/profile', protect, authController.getProfile);
