@@ -17,11 +17,16 @@ const LoginPage = () => {
     e.preventDefault();
     setError('');
     try {
+      console.log('Attempting login with:', { email });
       const response = await api.post('/auth/login', { email, password });
+      console.log('Login successful:', response.data);
       await login(response.data.accessToken);
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
+      console.error('Login error:', err);
+      console.error('Error response:', err.response);
+      const errorMessage = err.response?.data?.message || err.message || 'Login failed. Please check your credentials.';
+      setError(errorMessage);
     }
   };
 

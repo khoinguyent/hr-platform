@@ -10,12 +10,16 @@ services:
   frontend:
     build:
       context: ./frontend
+      args:
+        - REACT_APP_API_URL=http://localhost:8080/api
     ports:
-      - "3000:3000"
+      - "3000:80"
     environment:
       - REACT_APP_API_URL=http://localhost:8080/api
     networks:
       - headhunt_net
+    depends_on:
+      - api-gateway
 
   # =================================================================
   # Authentication Service
@@ -29,7 +33,9 @@ services:
       - DB_USER=auth_user
       - DB_PASSWORD=auth_password
       - DB_DATABASE=auth_db
-      # ... other auth-service env vars
+      - JWT_SECRET=your_jwt_secret_here
+      - CORS_ORIGIN=http://localhost:3000
+      - NODE_ENV=development
     networks:
       - headhunt_net
     depends_on:

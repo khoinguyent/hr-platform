@@ -22,11 +22,16 @@ const RegisterPage = () => {
     setError('');
     setSuccess('');
     try {
-      await api.post('/auth/register', formData);
+      console.log('Attempting registration with:', formData);
+      const response = await api.post('/auth/register', formData);
+      console.log('Registration successful:', response.data);
       setSuccess('Registration successful! Please log in.');
       setTimeout(() => navigate('/login'), 2000);
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+      console.error('Registration error:', err);
+      console.error('Error response:', err.response);
+      const errorMessage = err.response?.data?.message || err.message || 'Registration failed. Please try again.';
+      setError(errorMessage);
     }
   };
 

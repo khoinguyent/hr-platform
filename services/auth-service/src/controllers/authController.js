@@ -9,9 +9,7 @@ const generateTokens = (user) => {
     email: user.email,
     firstName: user.first_name,
     lastName: user.last_name,
-    isAdmin: user.is_admin || false,
-    iat: Math.floor(Date.now() / 1000),
-    exp: Math.floor(Date.now() / 1000) + (15 * 60) // 15 minutes
+    isAdmin: user.is_admin || false
   };
 
   const accessToken = jwt.sign(

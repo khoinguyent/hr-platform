@@ -33,8 +33,20 @@ export const AuthProvider = ({ children }) => {
 
   const login = (accessToken) => {
     localStorage.setItem('accessToken', accessToken);
+    console.log('AuthContext: Setting access token and fetching profile...');
     return api.get('/auth/profile').then(response => {
+      console.log('AuthContext: Profile fetched successfully:', response.data.user);
       setUser(response.data.user);
+    }).catch(error => {
+      console.error('AuthContext: Profile fetch failed:', error);
+      // Even if profile fetch fails, we can still set user from token
+      const decoded = jwtDecode(accessToken);
+      setUser({
+        id: decoded.id,
+        email: decoded.email,
+        firstName: decoded.firstName,
+        lastName: decoded.lastName
+      });
     });
   };
 

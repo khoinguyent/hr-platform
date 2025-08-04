@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const api = axios.create({
   baseURL: process.env.REACT_APP_API_URL || 'http://localhost:8080/api',
-  withCredentials: true, // Important for sending cookies
+  withCredentials: true, // Restore for proper cookie handling
 });
 
 // Interceptor to add the access token to requests
@@ -55,4 +55,4 @@ api.interceptors.response.use(
   }
 );
 
-export default api;
+export default api;// Test comment

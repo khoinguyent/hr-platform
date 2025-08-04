@@ -16,6 +16,9 @@ COPY . .
 
 # Build the React application for production.
 # This creates a `build` folder with static assets.
+# Pass environment variables to the build process
+ARG REACT_APP_API_URL
+ENV REACT_APP_API_URL=$REACT_APP_API_URL
 RUN npm run build
 
 # --- Stage 2: Production Stage ---

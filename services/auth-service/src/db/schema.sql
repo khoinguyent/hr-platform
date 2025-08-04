@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS users (
     password_hash VARCHAR(255),
     first_name VARCHAR(100),
     last_name VARCHAR(100),
+    is_admin BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
