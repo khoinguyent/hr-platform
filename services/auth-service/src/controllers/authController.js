@@ -3,16 +3,29 @@ const bcrypt = require('bcrypt');
 const userModel = require('../models/userModel');
 
 const generateTokens = (user) => {
+  // Enhanced JWT payload with more user context
+  const accessTokenPayload = {
+    id: user.id,
+    email: user.email,
+    firstName: user.first_name,
+    lastName: user.last_name,
+    isAdmin: user.is_admin || false,
+    iat: Math.floor(Date.now() / 1000),
+    exp: Math.floor(Date.now() / 1000) + (15 * 60) // 15 minutes
+  };
+
   const accessToken = jwt.sign(
-    { id: user.id, email: user.email },
-    process.env.ACCESS_TOKEN_SECRET,
+    accessTokenPayload,
+    process.env.JWT_SECRET || process.env.ACCESS_TOKEN_SECRET,
     { expiresIn: '15m' }
   );
+
   const refreshToken = jwt.sign(
-    { id: user.id },
-    process.env.REFRESH_TOKEN_SECRET,
+    { id: user.id, type: 'refresh' },
+    process.env.JWT_SECRET || process.env.REFRESH_TOKEN_SECRET,
     { expiresIn: '7d' }
   );
+
   return { accessToken, refreshToken };
 };
 
@@ -94,7 +107,65 @@ const authController = {
     res.json({ user });
   },
 
-  // Add other controller methods like refreshToken and logout here...
+  async refreshToken(req, res) {
+    try {
+      const { refreshToken } = req.cookies;
+      
+      if (!refreshToken) {
+        return res.status(401).json({ message: 'Refresh token not found' });
+      }
+
+      const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET || process.env.REFRESH_TOKEN_SECRET);
+      
+      if (decoded.type !== 'refresh') {
+        return res.status(401).json({ message: 'Invalid token type' });
+      }
+
+      const user = await userModel.findUserById(decoded.id);
+      if (!user) {
+        return res.status(401).json({ message: 'User not found' });
+      }
+
+      const { accessToken, refreshToken: newRefreshToken } = generateTokens(user);
+
+      // Set new refresh token cookie
+      res.cookie('refreshToken', newRefreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+      });
+
+      res.json({
+        accessToken,
+        user: { 
+          id: user.id, 
+          email: user.email, 
+          firstName: user.first_name,
+          lastName: user.last_name,
+          isAdmin: user.is_admin || false
+        }
+      });
+    } catch (error) {
+      console.error('Token refresh error:', error);
+      res.status(401).json({ message: 'Invalid refresh token' });
+    }
+  },
+
+  async logout(req, res) {
+    try {
+      res.clearCookie('refreshToken', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict'
+      });
+      
+      res.json({ message: 'Logged out successfully' });
+    } catch (error) {
+      console.error('Logout error:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  }
 };
 
 module.exports = authController;

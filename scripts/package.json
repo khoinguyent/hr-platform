@@ -1,0 +1,21 @@
+{
+  "name": "hr-platform-scripts",
+  "version": "1.0.0",
+  "description": "Scripts for generating dummy data for HR Platform",
+  "main": "generate-dummy-data.js",
+  "scripts": {
+    "test": "node test-connection.js",
+    "generate-data": "node generate-dummy-data.js",
+    "generate-users": "node generate-users-only.js",
+    "generate-jobs": "node generate-jobs-only.js",
+    "clear-data": "node clear-dummy-data.js"
+  },
+  "dependencies": {
+    "pg": "^8.11.5",
+    "bcrypt": "^5.1.1",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "dotenv": "^16.4.5"
+  }
+} 
