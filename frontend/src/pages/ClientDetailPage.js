@@ -11,7 +11,10 @@ const ClientDetailPage = () => {
   const [contacts, setContacts] = useState([]);
   const [interactions, setInteractions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
+
+  console.log('ClientDetailPage rendering with clientId:', clientId);
 
   useEffect(() => {
     fetchClientData();
@@ -20,17 +23,24 @@ const ClientDetailPage = () => {
   const fetchClientData = async () => {
     try {
       setLoading(true);
+      console.log('Fetching client data for ID:', clientId);
+      
       const [clientData, contactsData, interactionsData] = await Promise.all([
         clientService.getClientById(clientId),
         clientService.getClientContacts(clientId),
         clientService.getClientInteractions(clientId)
       ]);
 
+      console.log('Client data received:', clientData);
+      console.log('Contacts data received:', contactsData);
+      console.log('Interactions data received:', interactionsData);
+
       setClient(clientData.client);
       setContacts(contactsData.contacts || []);
       setInteractions(interactionsData.interactions || []);
     } catch (error) {
       console.error('Error fetching client data:', error);
+      setError(error.message || 'Failed to fetch client data');
     } finally {
       setLoading(false);
     }
@@ -68,7 +78,27 @@ const ClientDetailPage = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading client details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Error Loading Client</h2>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button
+            onClick={() => navigate('/')}
+            className="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-900"
+          >
+            Back to Clients
+          </button>
+        </div>
       </div>
     );
   }
@@ -78,6 +108,7 @@ const ClientDetailPage = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Client Not Found</h2>
+          <p className="text-gray-600 mb-4">The client with ID {clientId} could not be found.</p>
           <button
             onClick={() => navigate('/')}
             className="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-900"
@@ -178,19 +209,19 @@ const ClientDetailPage = () => {
                 <div className="bg-gray-50 rounded-lg p-4">
                   <h3 className="font-semibold text-gray-900 mb-2">Contact Information</h3>
                   <div className="space-y-2 text-sm">
-                    <div><span className="font-medium">Address:</span> {client.address}</div>
-                    <div><span className="font-medium">City:</span> {client.city}</div>
-                    <div><span className="font-medium">State:</span> {client.state}</div>
-                    <div><span className="font-medium">ZIP:</span> {client.zip_code}</div>
+                    <div><span className="font-medium">Address:</span> {client.address || 'N/A'}</div>
+                    <div><span className="font-medium">City:</span> {client.city || 'N/A'}</div>
+                    <div><span className="font-medium">State:</span> {client.state || 'N/A'}</div>
+                    <div><span className="font-medium">ZIP:</span> {client.postal_code || 'N/A'}</div>
                   </div>
                 </div>
 
                 <div className="bg-gray-50 rounded-lg p-4">
                   <h3 className="font-semibold text-gray-900 mb-2">Service Details</h3>
                   <div className="space-y-2 text-sm">
-                    <div><span className="font-medium">Status:</span> {client.status}</div>
-                    <div><span className="font-medium">Tier:</span> {client.service_tier}</div>
-                    <div><span className="font-medium">Contract Value:</span> ${client.contract_value?.toLocaleString() || 'N/A'}</div>
+                    <div><span className="font-medium">Status:</span> {client.status || 'N/A'}</div>
+                    <div><span className="font-medium">Tier:</span> {client.service_tier || 'N/A'}</div>
+                    <div><span className="font-medium">Contract Value:</span> ${client.annual_revenue?.toLocaleString() || 'N/A'}</div>
                     <div><span className="font-medium">Start Date:</span> {formatDate(client.contract_start_date)}</div>
                   </div>
                 </div>
