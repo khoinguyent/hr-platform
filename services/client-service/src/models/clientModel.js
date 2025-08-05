@@ -34,6 +34,25 @@ class ClientModel {
       created_by
     } = clientData;
 
+    // Process numeric fields to handle empty strings
+    const processNumericField = (value) => {
+      if (value === '' || value === null || value === undefined) {
+        return null;
+      }
+      return parseFloat(value) || null;
+    };
+
+    const processedValues = [
+      company_name, industry, company_size, website, 
+      processNumericField(founded_year), description,
+      primary_email, primary_phone, address, city, state, country, postal_code,
+      annual_revenue, processNumericField(employee_count), business_type, service_tier,
+      contract_start_date, contract_end_date, payment_terms, 
+      processNumericField(commission_rate), processNumericField(contract_value), 
+      processNumericField(average_time_to_fill), processNumericField(total_jobs_posted),
+      status, priority_level, notes, created_by
+    ];
+
     const query = `
       INSERT INTO clients (
         company_name, industry, company_size, website, founded_year, description,
@@ -46,17 +65,8 @@ class ClientModel {
       RETURNING *
     `;
 
-    const values = [
-      company_name, industry, company_size, website, founded_year, description,
-      primary_email, primary_phone, address, city, state, country, postal_code,
-      annual_revenue, employee_count, business_type, service_tier,
-      contract_start_date, contract_end_date, payment_terms, commission_rate,
-      contract_value, average_time_to_fill, total_jobs_posted,
-      status, priority_level, notes, created_by
-    ];
-
     try {
-      const result = await pool.query(query, values);
+      const result = await pool.query(query, processedValues);
       return { success: true, client: result.rows[0] };
     } catch (error) {
       console.error('Error creating client:', error);
@@ -178,8 +188,18 @@ class ClientModel {
 
     for (const [key, value] of Object.entries(updateData)) {
       if (allowedFields.includes(key) && value !== undefined) {
+        // Handle numeric fields - convert empty strings to null
+        let processedValue = value;
+        if (['founded_year', 'employee_count', 'commission_rate', 'contract_value', 'average_time_to_fill', 'total_jobs_posted'].includes(key)) {
+          if (value === '' || value === null || value === undefined) {
+            processedValue = null;
+          } else {
+            processedValue = parseFloat(value) || null;
+          }
+        }
+        
         updates.push(`${key} = $${valueIndex++}`);
-        values.push(value);
+        values.push(processedValue);
       }
     }
 
