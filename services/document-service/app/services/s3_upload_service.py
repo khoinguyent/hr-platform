@@ -160,8 +160,10 @@ class S3UploadService:
             Public URL
         """
         if self.endpoint_url:
-            # MinIO URL (development mode)
-            return f"{self.endpoint_url}/{self.bucket_name}/{s3_key}"
+            # MinIO URL (development mode) - use external URL for browser access
+            # Replace internal Docker hostname with external localhost URL
+            external_url = self.endpoint_url.replace('http://minio:9000', 'http://localhost:9000')
+            return f"{external_url}/{self.bucket_name}/{s3_key}"
         else:
             # AWS S3 URL (production mode)
             return f"https://{self.bucket_name}.s3.{self.region}.amazonaws.com/{s3_key}"
