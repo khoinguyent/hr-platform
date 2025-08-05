@@ -25,15 +25,6 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Configure maximum file size for uploads (50MB)
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 # Set maximum file size for uploads
 MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB in bytes
 
