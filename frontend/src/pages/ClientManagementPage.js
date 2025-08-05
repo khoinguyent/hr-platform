@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import clientService from '../services/clientService';
+import AddClientModal from '../components/AddClientModal';
 
 const ClientManagementPage = () => {
   const [clients, setClients] = useState([]);
@@ -9,6 +10,7 @@ const ClientManagementPage = () => {
   const [error, setError] = useState('');
   const [selectedClient, setSelectedClient] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
+  const [showAddModal, setShowAddModal] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -88,6 +90,18 @@ const ClientManagementPage = () => {
     navigate(`/clients/${clientId}`);
   };
 
+  const handleAddClient = async (clientData) => {
+    try {
+      await clientService.createClient(clientData);
+      setShowAddModal(false);
+      fetchClients(); // Refresh the client list
+      fetchStats(); // Refresh stats
+    } catch (error) {
+      console.error('Error creating client:', error);
+      setError('Failed to create client');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -138,7 +152,10 @@ const ClientManagementPage = () => {
                 <h1 className="text-3xl font-bold text-gray-900">Client Management</h1>
                 <p className="text-gray-600 mt-1">Manage your headhunting clients and contracts</p>
               </div>
-              <button className="bg-black hover:bg-gray-800 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+              <button 
+                onClick={() => setShowAddModal(true)}
+                className="bg-black hover:bg-gray-800 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+              >
                 + Add New Client
               </button>
             </div>
@@ -308,13 +325,23 @@ const ClientManagementPage = () => {
             <h3 className="mt-2 text-sm font-medium text-gray-900">No clients</h3>
             <p className="mt-1 text-sm text-gray-500">Get started by creating a new client.</p>
             <div className="mt-6">
-              <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+              <button 
+                onClick={() => setShowAddModal(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+              >
                 + Add New Client
               </button>
             </div>
           </div>
         )}
       </div>
+
+      {showAddModal && (
+        <AddClientModal
+          onClose={() => setShowAddModal(false)}
+          onAdd={handleAddClient}
+        />
+      )}
     </div>
   );
 };

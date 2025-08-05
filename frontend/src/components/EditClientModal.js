@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-const AddClientModal = ({ onClose, onAdd }) => {
+const EditClientModal = ({ onClose, onUpdate, client }) => {
   const [formData, setFormData] = useState({
     company_name: '',
     industry: '',
@@ -41,6 +41,51 @@ const AddClientModal = ({ onClose, onAdd }) => {
     notes: ''
   });
 
+  // Populate form data when client prop changes
+  useEffect(() => {
+    if (client) {
+      setFormData({
+        company_name: client.company_name || '',
+        industry: client.industry || '',
+        company_size: client.company_size || 'medium',
+        website: client.website || '',
+        founded_year: client.founded_year || '',
+        description: client.description || '',
+        
+        // Contact Information
+        primary_email: client.primary_email || '',
+        primary_phone: client.primary_phone || '',
+        address: client.address || '',
+        city: client.city || '',
+        state: client.state || '',
+        country: client.country || 'USA',
+        postal_code: client.postal_code || '',
+        
+        // Business Information
+        annual_revenue: client.annual_revenue || '',
+        employee_count: client.employee_count || '',
+        business_type: client.business_type || 'private',
+        
+        // Service Information
+        service_tier: client.service_tier || 'standard',
+        contract_start_date: client.contract_start_date || '',
+        contract_end_date: client.contract_end_date || '',
+        payment_terms: client.payment_terms || '',
+        commission_rate: client.commission_rate || '',
+        contract_value: client.contract_value || '',
+        
+        // Performance Metrics
+        average_time_to_fill: client.average_time_to_fill || '',
+        total_jobs_posted: client.total_jobs_posted || '0',
+        
+        // Status and Metadata
+        status: client.status || 'prospect',
+        priority_level: client.priority_level || 'medium',
+        notes: client.notes || ''
+      });
+    }
+  }, [client]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -51,14 +96,16 @@ const AddClientModal = ({ onClose, onAdd }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onAdd(formData);
+    onUpdate(client.id, formData);
   };
+
+  if (!client) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Add New Client</h2>
+          <h2 className="text-2xl font-bold text-gray-900">Edit Client</h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600"
@@ -501,7 +548,7 @@ const AddClientModal = ({ onClose, onAdd }) => {
               type="submit"
               className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
             >
-              Add Client
+              Update Client
             </button>
           </div>
         </form>
@@ -510,4 +557,4 @@ const AddClientModal = ({ onClose, onAdd }) => {
   );
 };
 
-export default AddClientModal; 
+export default EditClientModal; 
