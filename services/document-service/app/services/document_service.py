@@ -71,7 +71,7 @@ class DocumentService:
                 logger.error(f"Document not found: {document_id}")
                 return False
             
-            document.status = status
+            document.status = status.value  # Use enum value instead of enum object
             if s3_key:
                 document.s3_key = s3_key
             if s3_url:

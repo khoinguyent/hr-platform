@@ -32,6 +32,9 @@ class S3UploadService:
                     use_ssl=False
                 )
                 logger.info(f"Initialized MinIO client with endpoint: {self.endpoint_url}")
+                
+                # Ensure bucket exists for MinIO
+                self._ensure_bucket_exists()
             else:
                 # AWS S3 configuration (production mode)
                 self.s3_client = boto3.client(
@@ -42,6 +45,25 @@ class S3UploadService:
                 
         except Exception as e:
             logger.error(f"Failed to initialize S3 client: {str(e)}")
+            raise
+    
+    def _ensure_bucket_exists(self):
+        """Ensure the bucket exists, create if it doesn't"""
+        try:
+            # Check if bucket exists
+            try:
+                self.s3_client.head_bucket(Bucket=self.bucket_name)
+                logger.info(f"Bucket {self.bucket_name} already exists")
+            except ClientError as e:
+                error_code = e.response['Error']['Code']
+                if error_code == '404':
+                    # Bucket doesn't exist, create it
+                    self.s3_client.create_bucket(Bucket=self.bucket_name)
+                    logger.info(f"Created bucket {self.bucket_name}")
+                else:
+                    raise
+        except Exception as e:
+            logger.error(f"Error ensuring bucket exists: {str(e)}")
             raise
     
     def generate_s3_key(

@@ -4,12 +4,14 @@ from sqlalchemy.orm import Session
 from typing import Optional
 import logging
 import os
+import threading
 from datetime import datetime
 from dotenv import load_dotenv
 
 from .models.database import get_db
 from .models.document import DocumentType, DocumentStatus
 from .services.document_service import DocumentService
+from .services.queue_consumer import QueueConsumer
 
 load_dotenv()
 
@@ -37,6 +39,39 @@ MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB in bytes
 
 # Initialize document service
 document_service = DocumentService()
+
+# Initialize queue consumer
+queue_consumer = None
+consumer_thread = None
+
+@app.on_event("startup")
+async def startup_event():
+    """Startup event to initialize queue consumer"""
+    global queue_consumer, consumer_thread
+    
+    try:
+        # Initialize queue consumer
+        queue_consumer = QueueConsumer()
+        
+        # Start consumer in a separate thread
+        consumer_thread = threading.Thread(target=queue_consumer.start_consuming, daemon=True)
+        consumer_thread.start()
+        
+        logger.info("Queue consumer started successfully")
+    except Exception as e:
+        logger.error(f"Failed to start queue consumer: {str(e)}")
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Shutdown event to stop queue consumer"""
+    global queue_consumer
+    
+    try:
+        if queue_consumer:
+            queue_consumer.stop_consuming()
+            logger.info("Queue consumer stopped successfully")
+    except Exception as e:
+        logger.error(f"Error stopping queue consumer: {str(e)}")
 
 @app.get("/")
 async def root():
