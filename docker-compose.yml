@@ -73,10 +73,86 @@ services:
       - JWT_SECRET=your_jwt_secret_here
       - CORS_ORIGIN=http://localhost:3000
       - NODE_ENV=development
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=guest
+      - RABBITMQ_PASS=guest
+      - RABBITMQ_VHOST=/
     networks:
       - headhunt_net
     depends_on:
       - postgres-clients
+      - rabbitmq
+
+  # =================================================================
+  # Document Service
+  # =================================================================
+  document-service:
+    build:
+      context: ./services/document-service
+    environment:
+      - DATABASE_URL=postgresql://document_user:document_password@postgres-document-db:5432/document_db
+      - NODE_ENV=development
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+      - MINIO_BUCKET_NAME=hr-platform-documents
+      - MINIO_USE_SSL=false
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-minioadmin}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-minioadmin}
+      - AWS_REGION=${AWS_REGION:-us-east-1}
+      - S3_BUCKET_NAME=${S3_BUCKET_NAME:-hr-platform-documents}
+      - S3_ENDPOINT_URL=${S3_ENDPOINT_URL:-http://minio:9000}
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=guest
+      - RABBITMQ_PASS=guest
+      - RABBITMQ_VHOST=/
+    ports:
+      - "4004:4004"
+    networks:
+      - headhunt_net
+    depends_on:
+      - postgres-document-db
+      - rabbitmq
+      - minio
+    volumes:
+      - document_temp:/app/temp
+
+  # =================================================================
+  # RabbitMQ Message Queue
+  # =================================================================
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    ports:
+      - "5672:5672"   # AMQP protocol port
+      - "15672:15672" # Management UI port
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - headhunt_net
+
+  # =================================================================
+  # MinIO Object Storage (S3 Compatible)
+  # =================================================================
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    ports:
+      - "9000:9000"   # API port
+      - "9001:9001"   # Console port
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - headhunt_net
 
   # =================================================================
   # API Gateway (No changes needed, but depends on new services)
@@ -93,6 +169,7 @@ services:
       - auth-service
       - job-service
       - client-service
+      - document-service
 
   # =================================================================
   # Database for Auth Service
@@ -142,6 +219,24 @@ services:
     networks:
       - headhunt_net
 
+  # =================================================================
+  # Database for Document Service
+  # =================================================================
+  postgres-document-db:
+    image: postgres:15-alpine
+    container_name: postgres-document-db
+    environment:
+      - POSTGRES_USER=document_user
+      - POSTGRES_PASSWORD=document_password
+      - POSTGRES_DB=document_db
+    ports:
+      - "5435:5432" # Host port 5435 maps to this container's 5432 to avoid conflict
+    volumes:
+      - postgres_document_data:/var/lib/postgresql/data
+      - ./services/document-service/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
+    networks:
+      - headhunt_net
+
 # Define the network for all services to communicate
 networks:
   headhunt_net:
@@ -152,3 +247,7 @@ volumes:
   postgres_auth_data:
   postgres_jobs_data:
   postgres_clients_data:
+  postgres_document_data:
+  rabbitmq_data:
+  minio_data:
+  document_temp:
