@@ -1,6 +1,8 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
-const ClientGrid = ({ clients, onClientClick }) => {
+const ClientGrid = ({ clients }) => {
+  const navigate = useNavigate();
   const getStatusColor = (status) => {
     switch (status) {
       case 'active':
@@ -67,7 +69,7 @@ const ClientGrid = ({ clients, onClientClick }) => {
       {displayClients.map((client) => (
         <div
           key={client.id}
-          onClick={() => onClientClick(client)}
+          onClick={() => navigate(`/clients/${client.id}`)}
           className="bg-white rounded-lg shadow-sm p-6 cursor-pointer hover:shadow-md transition-shadow"
         >
           {/* Company Logo Placeholder */}

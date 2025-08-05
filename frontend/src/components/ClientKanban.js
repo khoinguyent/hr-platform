@@ -1,6 +1,9 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const ClientKanban = ({ clients }) => {
+  const navigate = useNavigate();
+  
   const columns = [
     { id: 'prospect', title: 'Prospects', color: 'bg-blue-50' },
     { id: 'active', title: 'Active', color: 'bg-green-50' },
@@ -21,6 +24,7 @@ const ClientKanban = ({ clients }) => {
             {getClientsByStatus(column.id).map((client) => (
               <div
                 key={client.id}
+                onClick={() => navigate(`/clients/${client.id}`)}
                 className="bg-white rounded-lg p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
               >
                 <h4 className="font-medium text-gray-900 mb-1">{client.company_name}</h4>

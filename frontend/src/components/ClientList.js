@@ -1,6 +1,9 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const ClientList = ({ clients }) => {
+  const navigate = useNavigate();
+  
   // Transform real API data to match component expectations
   const transformClientData = (client) => ({
     ...client,
@@ -78,7 +81,11 @@ const ClientList = ({ clients }) => {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {displayClients.map((client) => (
-              <tr key={client.id} className="hover:bg-gray-50 cursor-pointer">
+              <tr 
+                key={client.id} 
+                className="hover:bg-gray-50 cursor-pointer"
+                onClick={() => navigate(`/clients/${client.id}`)}
+              >
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
                     <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center mr-3">

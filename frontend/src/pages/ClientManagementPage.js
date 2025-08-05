@@ -70,13 +70,13 @@ const ClientManagementPage = () => {
   const renderView = () => {
     switch (viewMode) {
       case 'grid':
-        return <ClientGrid clients={clients} onClientClick={(client) => console.log('Client clicked:', client)} />;
+        return <ClientGrid clients={clients} />;
       case 'kanban':
         return <ClientKanban clients={clients} />;
       case 'list':
         return <ClientList clients={clients} />;
       default:
-        return <ClientGrid clients={clients} onClientClick={(client) => console.log('Client clicked:', client)} />;
+        return <ClientGrid clients={clients} />;
     }
   };
 
