@@ -23,14 +23,17 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# CORS middleware
+# Configure maximum file size for uploads (50MB)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure appropriately for production
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Set maximum file size for uploads
+MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB in bytes
 
 # Initialize document service
 document_service = DocumentService()
@@ -73,6 +76,13 @@ async def upload_document(
         expired_date: Document expiry date in ISO format (optional)
     """
     try:
+        # Validate file size
+        if file.size and file.size > MAX_FILE_SIZE:
+            raise HTTPException(
+                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                detail=f"File size ({file.size} bytes) exceeds maximum allowed size ({MAX_FILE_SIZE} bytes)"
+            )
+        
         # Validate document type
         try:
             # Try to find the enum by value first
@@ -206,8 +216,8 @@ async def get_client_documents(client_id: str, db: Session = Depends(get_db)):
                     "id": doc.id,
                     "name": doc.name,
                     "original_filename": doc.original_filename,
-                    "document_type": doc.document_type.value,
-                    "status": doc.status.value,
+                    "document_type": doc.document_type,
+                    "status": doc.status,
                     "s3_url": doc.s3_url,
                     "upload_date": doc.upload_date.isoformat(),
                     "expired_date": doc.expired_date.isoformat() if doc.expired_date else None
@@ -236,8 +246,8 @@ async def get_job_documents(job_id: str, db: Session = Depends(get_db)):
                     "id": doc.id,
                     "name": doc.name,
                     "original_filename": doc.original_filename,
-                    "document_type": doc.document_type.value,
-                    "status": doc.status.value,
+                    "document_type": doc.document_type,
+                    "status": doc.status,
                     "s3_url": doc.s3_url,
                     "upload_date": doc.upload_date.isoformat(),
                     "expired_date": doc.expired_date.isoformat() if doc.expired_date else None
@@ -266,8 +276,8 @@ async def get_user_documents(user_id: str, db: Session = Depends(get_db)):
                     "id": doc.id,
                     "name": doc.name,
                     "original_filename": doc.original_filename,
-                    "document_type": doc.document_type.value,
-                    "status": doc.status.value,
+                    "document_type": doc.document_type,
+                    "status": doc.status,
                     "s3_url": doc.s3_url,
                     "upload_date": doc.upload_date.isoformat(),
                     "expired_date": doc.expired_date.isoformat() if doc.expired_date else None

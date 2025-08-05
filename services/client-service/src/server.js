@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const clientRoutes = require('./routes/clientRoutes');
+// const QueueConsumer = require('./services/queueConsumer');
 
 const app = express();
 const PORT = process.env.PORT || 4003;
@@ -41,10 +42,19 @@ app.use((error, req, res, next) => {
 });
 
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`🚀 Client Service running on port ${PORT}`);
   console.log(`📊 Health check: http://localhost:${PORT}/health`);
   console.log(`🔗 API Base: http://localhost:${PORT}/api/clients`);
+  
+  // Start queue consumer - temporarily disabled
+  // try {
+  //   const queueConsumer = new QueueConsumer();
+  //   await queueConsumer.startConsuming();
+  //   console.log(`📨 Queue consumer started for client-doc-queue`);
+  // } catch (error) {
+  //   console.error('Failed to start queue consumer:', error);
+  // }
 });
 
 module.exports = app; 

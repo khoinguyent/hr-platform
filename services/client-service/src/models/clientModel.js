@@ -24,6 +24,10 @@ class ClientModel {
       contract_start_date,
       contract_end_date,
       payment_terms,
+      commission_rate,
+      contract_value,
+      average_time_to_fill,
+      total_jobs_posted,
       status,
       priority_level,
       notes,
@@ -35,9 +39,10 @@ class ClientModel {
         company_name, industry, company_size, website, founded_year, description,
         primary_email, primary_phone, address, city, state, country, postal_code,
         annual_revenue, employee_count, business_type, service_tier,
-        contract_start_date, contract_end_date, payment_terms,
+        contract_start_date, contract_end_date, payment_terms, commission_rate,
+        contract_value, average_time_to_fill, total_jobs_posted,
         status, priority_level, notes, created_by
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28)
       RETURNING *
     `;
 
@@ -45,7 +50,8 @@ class ClientModel {
       company_name, industry, company_size, website, founded_year, description,
       primary_email, primary_phone, address, city, state, country, postal_code,
       annual_revenue, employee_count, business_type, service_tier,
-      contract_start_date, contract_end_date, payment_terms,
+      contract_start_date, contract_end_date, payment_terms, commission_rate,
+      contract_value, average_time_to_fill, total_jobs_posted,
       status, priority_level, notes, created_by
     ];
 
@@ -161,7 +167,8 @@ class ClientModel {
       'company_name', 'industry', 'company_size', 'website', 'founded_year', 'description',
       'primary_email', 'primary_phone', 'address', 'city', 'state', 'country', 'postal_code',
       'annual_revenue', 'employee_count', 'business_type', 'service_tier',
-      'contract_start_date', 'contract_end_date', 'payment_terms',
+      'contract_start_date', 'contract_end_date', 'payment_terms', 'commission_rate',
+      'contract_value', 'average_time_to_fill', 'total_jobs_posted',
       'status', 'priority_level', 'notes'
     ];
 

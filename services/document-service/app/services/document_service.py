@@ -193,8 +193,11 @@ class DocumentService:
         return db.query(Document).filter(Document.id == document_id).first()
     
     def get_client_documents(self, db: Session, client_id: str) -> list[Document]:
-        """Get all documents for a client"""
-        return db.query(Document).filter(Document.client_id == client_id).all()
+        """Get all documents for a client, excluding job and resume documents"""
+        return db.query(Document).filter(
+            Document.client_id == client_id,
+            Document.document_type.notin_([DocumentType.JOB_DESCRIPTION.value, DocumentType.RESUME.value])
+        ).all()
     
     def get_job_documents(self, db: Session, job_id: str) -> list[Document]:
         """Get all documents for a job"""

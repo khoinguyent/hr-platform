@@ -1,5 +1,5 @@
 const express = require('express');
-const cors = require('cors');
+// const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const authRoutes = require('./routes/authRoutes'); // Assume routes are defined
 
@@ -8,10 +8,11 @@ const app = express();
 // It's crucial to trust the proxy when running behind a load balancer
 app.set('trust proxy', 1);
 
-app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
-  credentials: true, // Restore for proper cookie handling
-}));
+// CORS middleware - removed since nginx handles CORS
+// app.use(cors({
+//   origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+//   credentials: true, // Restore for proper cookie handling
+// }));
 app.use(express.json());
 app.use(cookieParser());
 

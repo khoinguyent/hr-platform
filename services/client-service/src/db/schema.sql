@@ -29,6 +29,12 @@ CREATE TABLE IF NOT EXISTS clients (
     contract_start_date DATE,
     contract_end_date DATE,
     payment_terms VARCHAR(100),
+    commission_rate DECIMAL(5,2), -- Percentage (e.g., 20.00 for 20%)
+    contract_value DECIMAL(15,2), -- Total contract value in dollars
+    
+    -- Performance Metrics
+    average_time_to_fill INTEGER, -- Average days to fill a position
+    total_jobs_posted INTEGER DEFAULT 0, -- Total number of jobs posted
     
     -- Status and Metadata
     status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'inactive', 'prospect', 'suspended')),
