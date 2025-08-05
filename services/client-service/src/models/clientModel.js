@@ -42,12 +42,20 @@ class ClientModel {
       return parseFloat(value) || null;
     };
 
+    // Process date fields to handle empty strings
+    const processDateField = (value) => {
+      if (value === '' || value === null || value === undefined) {
+        return null;
+      }
+      return value;
+    };
+
     const processedValues = [
       company_name, industry, company_size, website, 
       processNumericField(founded_year), description,
       primary_email, primary_phone, address, city, state, country, postal_code,
       annual_revenue, processNumericField(employee_count), business_type, service_tier,
-      contract_start_date, contract_end_date, payment_terms, 
+      processDateField(contract_start_date), processDateField(contract_end_date), payment_terms, 
       processNumericField(commission_rate), processNumericField(contract_value), 
       processNumericField(average_time_to_fill), processNumericField(total_jobs_posted),
       status, priority_level, notes, created_by
@@ -195,6 +203,13 @@ class ClientModel {
             processedValue = null;
           } else {
             processedValue = parseFloat(value) || null;
+          }
+        }
+        
+        // Handle date fields - convert empty strings to null
+        if (['contract_start_date', 'contract_end_date'].includes(key)) {
+          if (value === '' || value === null || value === undefined) {
+            processedValue = null;
           }
         }
         
