@@ -397,52 +397,6 @@ const ClientDetailPage = () => {
               </p>
             </div>
 
-            {/* Main Contact Point */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Main Contact Point</h3>
-              <div className="space-y-3">
-                <div className="flex items-center">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                    <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Primary Contact</p>
-                    <p className="font-medium text-gray-900">{client.primary_email || 'No email provided'}</p>
-                  </div>
-                </div>
-                {client.primary_phone && (
-                  <div className="flex items-center">
-                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
-                      <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Phone</p>
-                      <p className="font-medium text-gray-900">{client.primary_phone}</p>
-                    </div>
-                  </div>
-                )}
-                {client.website && (
-                  <div className="flex items-center">
-                    <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-3">
-                      <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Website</p>
-                      <a href={client.website} target="_blank" rel="noopener noreferrer" className="font-medium text-blue-600 hover:text-blue-800">
-                        {client.website.replace(/^https?:\/\//, '')}
-                      </a>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
             {/* Company Address */}
             <div className="bg-white rounded-lg shadow p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Company Address</h3>
@@ -458,30 +412,105 @@ const ClientDetailPage = () => {
               </div>
             </div>
 
-            {/* Company Information */}
+            {/* Service Information */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Company Information</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Service Information</h3>
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Industry</span>
-                  <span className="font-medium">{client.industry || 'Not specified'}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Company Size</span>
-                  <span className="font-medium">{client.company_size || 'Not specified'}</span>
-                </div>
-                <div className="flex justify-between items-center">
                   <span className="text-gray-600">Service Tier</span>
-                  <span className="font-medium">{client.service_tier || 'Not specified'}</span>
+                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getServiceTierColor(client.service_tier)}`}>
+                    {client.service_tier || 'Not specified'}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Contract Period</span>
+                  <div className="text-right">
+                    <div className="font-medium">
+                      {client.contract_start_date && client.contract_end_date 
+                        ? `${formatDate(client.contract_start_date)} - ${formatDate(client.contract_end_date)}`
+                        : 'Not specified'
+                      }
+                    </div>
+                    {client.contract_end_date && (
+                      <div className="text-sm text-gray-500">
+                        {(() => {
+                          const endDate = new Date(client.contract_end_date);
+                          const today = new Date();
+                          const diffTime = endDate - today;
+                          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                          return `${diffDays > 0 ? diffDays : Math.abs(diffDays)} days ${diffDays > 0 ? 'remaining' : 'overdue'}`;
+                        })()}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Payment Terms</span>
+                  <span className="font-medium">{client.payment_terms || 'Not specified'}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Commission Rate</span>
+                  <span className="font-medium text-green-600">
+                    {client.commission_rate ? `${client.commission_rate}%` : 'Not specified'}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Contract Value</span>
+                  <span className="font-medium">
+                    {client.contract_value ? formatCurrency(client.contract_value) : 'Not specified'}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Business Type</span>
+                  <span className="font-medium">{client.business_type || 'Not specified'}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Annual Revenue</span>
+                  <span className="font-medium">{client.annual_revenue || 'Not specified'}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Employee Count</span>
+                  <span className="font-medium">{client.employee_count || 'Not specified'}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Founded Year</span>
+                  <span className="font-medium">{client.founded_year || 'Not specified'}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Performance Metrics */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Performance Metrics</h3>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Average Time to Fill</span>
+                  <span className="font-medium">
+                    {client.average_time_to_fill ? `${client.average_time_to_fill} days` : 'Not specified'}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Total Jobs Posted</span>
+                  <span className="font-medium">{client.total_jobs_posted || '0'}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Contract Value</span>
+                  <span className="font-medium">
+                    {client.contract_value ? formatCurrency(client.contract_value) : 'Not specified'}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Status</span>
                   <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(client.status)}`}>
-                    {client.status}
+                    {client.status || 'Not specified'}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Created</span>
+                  <span className="text-gray-600">Priority Level</span>
+                  <span className="font-medium">{client.priority_level || 'Not specified'}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Created Date</span>
                   <span className="font-medium">{formatDate(client.created_at)}</span>
                 </div>
               </div>
